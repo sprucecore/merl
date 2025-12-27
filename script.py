@@ -58,11 +58,11 @@ names: list[str] = [
     "birch_log", "pumpkin_side", "carved_pumpkin", "jack_o_lantern", "cake_top",
     "cake_side", "cake_inner", "cake_bottom", "red_mushroom_block", "brown_mushroom_block",
     "attached_pumpkin_stem", "rail", "red_wool", "pink_wool", "repeater",
-    "spruce_leaves", "red_sandstone_bottom", None, None, "melon_side",
+    "spruce_leaves", "red_sandstone_bottom", "bed.foot_top", "bed.head_top", "melon_side",
     "melon_top", "cauldron_top", "cauldron_inner", "note_block", "mushroom_stem",
     "mushroom_block_inside", "vine", "lapis_block", "green_wool", "lime_wool",
-    "repeater_on", "glass_pane_top", None, None, None,
-    None, "jungle_log", "cauldron_side", "cauldron_bottom", "brewing_stand_base",
+    "repeater_on", "glass_pane_top", "bed.back", "bed.foot_side", "bed.head_side",
+    "bed.front", "jungle_log", "cauldron_side", "cauldron_bottom", "brewing_stand_base",
     "brewing_stand", "end_portal_frame_top", "end_portal_frame_side", "lapis_ore", "brown_wool",
     "yellow_wool", "powered_rail", None, None, "enchanting_table_top",
     "dragon_egg",
@@ -298,6 +298,16 @@ names: list[str] = [
 type Entities = Image.Image | dict[str, Entities]
 entities: Entities = {}
 
+def addTexture(image, *keys):
+    current = entities
+
+    for key in keys[:-1]:
+        if key not in current:
+            current[key] = {}
+        current = current[key]
+
+    current[keys[-1]] = image
+
 notUsedAtlas = Image.new("RGBA", atlas.size, (0, 0, 0, 0))
 
 index = 0
@@ -318,19 +328,15 @@ for y in range(ROWS):
             notUsedAtlas.paste(cropped, (left, top))
         elif "." in name:
             parts = name.split(".")
-            current = entities
-
-            for part in parts[:-1]:
-                if part not in current:
-                    current[part] = {}
-                current = current[part]
-
-            current[parts[-1]] = cropped
+            addTexture(cropped, *parts)
 
             if parts[0] == "shulker" and parts[2] == "top":
                 cropped.save(BLOCKS_PATH + parts[1] + "_shulker_box.png")
         else:
             cropped.save(BLOCKS_PATH + name + ".png")
+
+            if name == "oak_planks":
+                addTexture(cropped, "bed", "bottom")
 
             if name.endswith("fire_0"):
                 cropped.save(BLOCKS_PATH + name[:-1] + "1.png")
@@ -338,6 +344,46 @@ for y in range(ROWS):
         index += 1
 
 notUsedAtlas.save("NotUsedAtlas.png")
+
+def bed():
+    bed = entities["bed"]
+
+    path = ENTITIES_PATH + "bed/"
+    makedirs(path)
+
+    texture = Image.new("RGBA", (TEXTURE_SIZE * 4, TEXTURE_SIZE * 4), (0, 0, 0, 0))
+    head_top = bed["head_top"].transpose(Image.ROTATE_90)
+    foot_top = bed["foot_top"].transpose(Image.ROTATE_90)
+    head_side = bed["head_side"].crop((0, 7, TEXTURE_SIZE, TEXTURE_SIZE - 3)).transpose(Image.ROTATE_90)
+    foot_side = bed["foot_side"].crop((0, 7, TEXTURE_SIZE, TEXTURE_SIZE - 3)).transpose(Image.ROTATE_90)
+    head_side_flipped = head_side.transpose(Image.FLIP_LEFT_RIGHT)
+    foot_side_flipped = foot_side.transpose(Image.FLIP_LEFT_RIGHT)
+    front = bed["front"].crop((0, 7, TEXTURE_SIZE, TEXTURE_SIZE - 3)).transpose(Image.ROTATE_180)
+    back = bed["back"].crop((0, 7, TEXTURE_SIZE, TEXTURE_SIZE - 3)).transpose(Image.ROTATE_180)
+    bottom = bed["bottom"]
+    left_leg = bed["back"].crop((0, 13, 3, TEXTURE_SIZE))
+    right_leg = bed["back"].crop((TEXTURE_SIZE - 3, 13, TEXTURE_SIZE, TEXTURE_SIZE))
+
+    texture.paste(head_top, (6, 6))
+    texture.paste(foot_top, (6, 6 * 2 + TEXTURE_SIZE))
+    texture.paste(head_side_flipped, (0, 6))
+    texture.paste(foot_side_flipped, (0, 6 * 2 + TEXTURE_SIZE))
+    texture.paste(head_side, (TEXTURE_SIZE + 6, 6))
+    texture.paste(foot_side, (TEXTURE_SIZE + 6, 6 * 2 + TEXTURE_SIZE))
+    texture.paste(front, (6, 0))
+    texture.paste(back, (6 + TEXTURE_SIZE, 6 + TEXTURE_SIZE))
+    texture.paste(bottom, (6 * 2 + TEXTURE_SIZE, 6))
+    texture.paste(bottom, (6 * 2 + TEXTURE_SIZE, 6 * 2 + TEXTURE_SIZE))
+
+    pixel = right_leg.getpixel((0, 0))
+    draw = ImageDraw.Draw(texture)
+
+    for i in range(4):
+        texture.paste(left_leg, (6 * 3 + TEXTURE_SIZE * 2 + 3, 3 + 6 * i))
+        texture.paste(right_leg, (6 * 3 + TEXTURE_SIZE * 2, 3 + 6 * i))
+        draw.rectangle((6 * 3 + TEXTURE_SIZE * 2 + 3, 6 * i, 6 * 3 + TEXTURE_SIZE * 2 + 3 + 2, 6 * i + 2), fill=pixel)
+
+    texture.save(path + "red.png")
 
 def decorated_pot():
     decorated_pot = entities["decorated_pot"]
@@ -411,5 +457,6 @@ def shulker():
 
         texture.save(path + "shulker_" + color + ".png")
 
+bed()
 decorated_pot()
 shulker()
