@@ -168,7 +168,7 @@ names: list[str] = [
     "cornflower", "lily_of_the_valley", "wither_rose", "bamboo_large_leaves", "bamboo_singleleaf",
     "bamboo_small_leaves", "bamboo_stage0", "bamboo_stalk", "lantern", "sweet_berry_bush_stage0",
     "sweet_berry_bush_stage1", "sweet_berry_bush_stage2", "sweet_berry_bush_stage3", "barrel_top", "barrel_side",
-    "barrel_bottom", "barrel_top_open", "bell_top", "bell_side", "bell_bottom",
+    "barrel_bottom", "barrel_top_open", "bell.top", "bell.side", "bell.bottom",
     "blast_furnace_top",
 
     "blast_furnace_side", "blast_furnace_front", "blast_furnace_front_on", "composter_top", "composter_side",
@@ -330,6 +330,9 @@ for y in range(ROWS):
             parts = name.split(".")
             addTexture(cropped, *parts)
 
+            if parts[0] == "bell":
+                cropped.save(BLOCKS_PATH + "bell_" + parts[1] + ".png")
+
             if parts[0] == "shulker" and parts[2] == "top":
                 cropped.save(BLOCKS_PATH + parts[1] + "_shulker_box.png")
         else:
@@ -384,6 +387,28 @@ def bed():
         draw.rectangle((6 * 3 + TEXTURE_SIZE * 2 + 3, 6 * i, 6 * 3 + TEXTURE_SIZE * 2 + 3 + 2, 6 * i + 2), fill=pixel)
 
     texture.save(path + "red.png")
+
+def bell():
+    bell = entities["bell"]
+
+    path = ENTITIES_PATH + "bell/"
+    makedirs(path)
+
+    texture = Image.new("RGBA", (TEXTURE_SIZE * 2, TEXTURE_SIZE * 2), (0, 0, 0, 0))
+    top = bell["top"].crop((1, 1, 7, 7))
+    side_top = bell["side"].crop((1, 0, 7, 7)).transpose(Image.ROTATE_180)
+    side_bottom = bell["side"].crop((0, 7, 8, 9)).transpose(Image.ROTATE_180)
+    bottom = bell["bottom"].crop((0, 0, 8, 8))
+
+    for i in range(2):
+        texture.paste(top, (6 + 6 * i, 0))
+        texture.paste(bottom, (8 + 8 * i, 6 + 7))
+
+    for i in range(4):
+        texture.paste(side_top, (6 * i, 6))
+        texture.paste(side_bottom, (8 * i, 6 + 7 + 8))
+
+    texture.save(path + "bell_body.png")
 
 def decorated_pot():
     decorated_pot = entities["decorated_pot"]
@@ -458,5 +483,6 @@ def shulker():
         texture.save(path + "shulker_" + color + ".png")
 
 bed()
+bell()
 decorated_pot()
 shulker()
