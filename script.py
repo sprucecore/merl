@@ -1,11 +1,13 @@
-from PIL import Image
-import os, sys
+from PIL import Image, ImageDraw
+import os, sys, shutil
 
-atlas_path = "WorkshopTextureAtlas.png"
-blocks_path = "assets/minecraft/textures/block/"
+ATLAS_PATH = "WorkshopTextureAtlas.png"
+ASSETS_PATH = "assets/"
+BLOCKS_PATH = ASSETS_PATH + "minecraft/textures/block/"
+ENTITIES_PATH = ASSETS_PATH + "minecraft/textures/entity/"
 
-if os.path.exists(atlas_path):
-    atlas = Image.open(atlas_path)
+if os.path.exists(ATLAS_PATH):
+    atlas = Image.open(ATLAS_PATH)
 else:
     sys.exit(
         "Download the texture atlas from "
@@ -13,12 +15,17 @@ else:
         "and place it in the same directory as this script"
     )
 
-if not os.path.exists(blocks_path):
-    os.makedirs(blocks_path)
+def makedirs(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-tileSize = 18
-columns = 56
-rows = 56
+shutil.rmtree(ASSETS_PATH)
+makedirs(BLOCKS_PATH)
+
+TILE_SIZE = 18
+TEXTURE_SIZE = 16
+COLUMNS = 56
+ROWS = 56
 
 names: list[str] = [
     "grass_block_top", "stone", "dirt", "grass_block_side", "oak_planks",
@@ -246,8 +253,8 @@ names: list[str] = [
     "suspicious_gravel_3", "suspicious_sand_0", "suspicious_sand_1", "suspicious_sand_2", "suspicious_sand_3",
     "torchflower", "torchflower_crop_stage0", "torchflower_crop_stage1", "bamboo_block", "bamboo_block_top",
     "bamboo_door_bottom", "bamboo_door_top", "bamboo_fence", "bamboo_fence_gate", "bamboo_fence_particle",
-    "bamboo_fence_gate_particle", "bamboo_mosaic", "bamboo_planks", "bamboo_trapdoor", None,
-    None, None, None, None, "stripped_bamboo_block",
+    "bamboo_fence_gate_particle", "bamboo_mosaic", "bamboo_planks", "bamboo_trapdoor", "decorated_pot.side",
+    "decorated_pot.rim_top", "decorated_pot.rim_bottom", "decorated_pot.top", "decorated_pot.bottom", "stripped_bamboo_block",
     "stripped_bamboo_block_top", "chiseled_bookshelf_top", "chiseled_bookshelf_side", "chiseled_bookshelf_empty", "copper_bulb",
     "copper_bulb_lit", "copper_bulb_lit_powered", "copper_bulb_powered", "copper_door_bottom", "copper_door_top",
     "copper_grate", "copper_trapdoor", "crafter_bottom", "crafter_east", "crafter_east_crafting",
@@ -288,30 +295,73 @@ names: list[str] = [
     "dried_ghast_hydration_3_top", "dried_ghast_hydration_3_west"
 ]
 
+type Entities = Image.Image | dict[str, Entities]
+entities: Entities = {}
+
 notUsedAtlas = Image.new("RGBA", atlas.size, (0, 0, 0, 0))
 
 index = 0
-for y in range(rows):
-    for x in range(columns):
+for y in range(ROWS):
+    for x in range(COLUMNS):
         if (index >= len(names)):
             break
 
-        left = x * tileSize
-        top = y * tileSize
-        right = left + tileSize
-        bottom = top + tileSize
+        left = x * TILE_SIZE
+        top = y * TILE_SIZE
+        right = left + TILE_SIZE
+        bottom = top + TILE_SIZE
 
         cropped = atlas.crop((left + 1, top + 1, right - 1, bottom - 1))
         name = names[index]
 
         if name == None:
             notUsedAtlas.paste(cropped, (left, top))
+        elif "." in name:
+            parts = name.split(".")
+            current = entities
+
+            for part in parts[:-1]:
+                if part not in current:
+                    current[part] = {}
+                current = current[part]
+
+            current[parts[-1]] = cropped
         else:
-            cropped.save(blocks_path + name + ".png")
+            cropped.save(BLOCKS_PATH + name + ".png")
 
             if name.endswith("fire_0"):
-                cropped.save(blocks_path + name[:-1] + "1.png")
+                cropped.save(BLOCKS_PATH + name[:-1] + "1.png")
 
         index += 1
 
 notUsedAtlas.save("NotUsedAtlas.png")
+
+def decorated_pot():
+    decorated_pot = entities["decorated_pot"]
+
+    path = ENTITIES_PATH + "decorated_pot/"
+    makedirs(path)
+
+    decorated_pot["side"].save(path + "decorated_pot_side.png")
+
+    texture = Image.new("RGBA", (TEXTURE_SIZE * 2, TEXTURE_SIZE * 2), (0, 0, 0, 0))
+    rim_top = decorated_pot["rim_top"].crop((0, 0, 8, 8))
+    rim_bottom = decorated_pot["rim_bottom"].crop((0, 0, 8, 8))
+    rim_left = decorated_pot["rim_top"].crop((0, 8, TEXTURE_SIZE, 11))
+    rim_right = decorated_pot["rim_bottom"].crop((0, 8, TEXTURE_SIZE, 11))
+    rim_bottom_left = decorated_pot["rim_top"].crop((0, 11, 12, 12))
+    rim_bottom_right = decorated_pot["rim_bottom"].crop((0, 11, 12, 12))
+    top = decorated_pot["top"].crop((1, 1, TEXTURE_SIZE - 1, TEXTURE_SIZE - 1))
+    bottom = decorated_pot["bottom"].crop((1, 1, TEXTURE_SIZE - 1, TEXTURE_SIZE - 1))
+
+    texture.paste(rim_top, (8, 0))
+    texture.paste(rim_bottom, (16, 0))
+    texture.paste(rim_left, (0, 8))
+    texture.paste(rim_right, (TEXTURE_SIZE, 8))
+    texture.paste(rim_bottom_left, (0, 11))
+    texture.paste(rim_bottom_right, (12, 11))
+    texture.paste(top, (0, 13))
+    texture.paste(bottom, (14, 13))
+    texture.save(path + "decorated_pot_base.png")
+
+decorated_pot()
