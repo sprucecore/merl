@@ -1,7 +1,11 @@
 from PIL import Image, ImageDraw
 import os, sys, shutil
 
-ATLAS_PATH = "WorkshopTextureAtlas.png"
+ATLAS_PATHS = ["WorkshopTextureAtlas.png", "workshopTextureAtlas.png"]
+ATLAS_PATH = next(
+    (path for path in ATLAS_PATHS if os.path.exists(path)),
+    None
+)
 ASSETS_PATH = "assets/"
 BLOCKS_PATH = ASSETS_PATH + "minecraft/textures/block/"
 ENTITIES_PATH = ASSETS_PATH + "minecraft/textures/entity/"
@@ -11,7 +15,8 @@ if os.path.exists(ATLAS_PATH):
     atlas = Image.open(ATLAS_PATH)
 else:
     sys.exit(
-        "Download the texture atlas from "
+        "Run getTextureAtlas.py to grab the atlas from the minecraft website or " +
+        "download the texture atlas from "
         "https://minecraft.wiki/images/WorkshopTextureAtlas.png "
         "and place it in the same directory as this script"
     )
@@ -20,7 +25,9 @@ def makedirs(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-shutil.rmtree(ASSETS_PATH)
+# Only remove the assets directory if it exists
+if os.path.exists(ASSETS_PATH):
+    shutil.rmtree(ASSETS_PATH)
 makedirs(BLOCKS_PATH)
 makedirs(ITEMS_PATH)
 
