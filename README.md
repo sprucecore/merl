@@ -41,4 +41,3 @@ Most block entities are missing some textures, as they are not present in the at
 
 ### Textures not implemented yet:
 - Double chest
-- Redstone wire

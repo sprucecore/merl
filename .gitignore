@@ -1,0 +1,8 @@
+# Stuff people might put in here
+*venv/
+# Artifacts
+assets/
+NotUsedAtlas.png
+workshopTextureAtlas.png
+WorkshopTextureAtlas.png
+merl_pack.zip
