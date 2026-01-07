@@ -73,12 +73,12 @@ names: list[str] = [
     "repeater_on", "glass_pane_top", "bed.back", "bed.foot_side", "bed.head_side",
     "bed.front", "jungle_log", "cauldron_side", "cauldron_bottom", "brewing_stand_base",
     "brewing_stand", "end_portal_frame_top", "end_portal_frame_side", "lapis_ore", "brown_wool",
-    "yellow_wool", "powered_rail", None, None, "enchanting_table_top",
+    "yellow_wool", "powered_rail", "redstone_dust_line0", "redstone_dust_line1", "enchanting_table_top",
     "dragon_egg",
 
     "cocoa_stage2", "cocoa_stage1", "cocoa_stage0", "emerald_ore", "tripwire_hook",
     "tripwire", "end_portal_frame_eye", "end_stone", "sandstone_top", "blue_wool",
-    "light_blue_wool", "powered_rail_on", None, "acacia_log", "enchanting_table_side",
+    "light_blue_wool", "powered_rail_on", "redstone_dust_dot", "acacia_log", "enchanting_table_side",
     "enchanting_table_bottom", "end_portal", None, "flower_pot", "birch_log_top",
     "spruce_log_top", "jungle_log_top", "melon_stem", "attached_melon_stem", "sandstone",
     "purple_wool", "magenta_wool", "detector_rail", "birch_leaves", "chiseled_red_sandstone",
@@ -133,9 +133,10 @@ names: list[str] = [
     "chain_command_block_front", "chain_command_block_back", "chain_command_block_side", "chain_command_block_conditional", "frosted_ice_0",
     "frosted_ice_1", "frosted_ice_2", "frosted_ice_3", "structure_block_corner", "structure_block_data",
     "structure_block_load", "structure_block_save", "barrier", "water_overlay", "magma",
-    "nether_wart_block", "red_nether_bricks", "bone_block_side", "bone_block_top", None,
-    None, "chest.normal.lock", "water_flow", "lava_still", None,
-    None, None, None, None, None,
+    "nether_wart_block", "red_nether_bricks", "bone_block_side", "bone_block_top", None, # Empty
+    None, # Redstone active, all directions
+    "chest.normal.lock", "water_flow", "lava_still", 
+    None, None, None, None, None, None, # More redstone, not needed
     "shulker.white.top", "shulker.orange.top", "shulker.magenta.top", "shulker.light_blue.top", "shulker.yellow.top",
     "shulker.lime.top", "shulker.pink.top", "shulker.gray.top", "shulker.light_gray.top", "shulker.cyan.top",
     "shulker.purple.top", "shulker.blue.top", "shulker.brown.top", "shulker.green.top", "shulker.red.top",
@@ -159,7 +160,7 @@ names: list[str] = [
     "shulker.magenta.bottom", "shulker.light_blue.bottom", "shulker.yellow.bottom", "shulker.lime.bottom", "shulker.pink.bottom",
     "shulker.gray.bottom", "shulker.light_gray.bottom", "shulker.cyan.bottom", "shulker.purple.bottom", "shulker.blue.bottom",
     "shulker.brown.bottom", "shulker.green.bottom", "shulker.red.bottom", "shulker.black.bottom", "observer_back",
-    "observer_back_on", "observer_front", "observer_side", "observer_top", None,
+    "observer_back_on", "observer_front", "observer_side", "observer_top", None, # These two nones are duplicated white shulker box textures
     None, "dried_kelp_top", "dried_kelp_side", "dried_kelp_bottom", "kelp",
     "kelp_plant", "sea_pickle", "blue_ice", "tall_seagrass_bottom", "tall_seagrass_top",
     "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log", "stripped_jungle_log", "stripped_acacia_log",
